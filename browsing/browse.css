@@ -1,0 +1,101 @@
+/* browse.css - Sydney's browsing pages (categories, makeup types, product list)
+   Load AFTER ../navigation-bar/styles.css so these rules can override the shared ones.
+   Same look as the product detail pages: Karla font, pink gradient, pink #f7a0b0 buttons
+   with a #9f1f47 border, white rounded-square back button, shared pink navbar. */
+
+:root { --pink: #f7a0b0; --border: #9f1f47; --page-pink: #fff5f6; }
+
+body { font-family: Karla, Arial, sans-serif; color: #000; }
+
+/* The shared .phone frame is 393 x 852 and hides overflow, so the page scrolls inside it
+   and the navbar stays fixed at the bottom of the phone. */
+.phone.browse { padding: 0; overflow: hidden;
+                background: linear-gradient(#fdecef 0%, var(--page-pink) 55%, #fff 100%); }
+.browse-scroll { height: 100%; overflow-y: auto; padding: 16px 20px 92px; }
+
+/* Header: centered title with the same white rounded back button as the product pages */
+.top-bar { position: relative; display: flex; align-items: center; justify-content: center;
+           min-height: 56px; margin-bottom: 16px; }
+.top-bar h1 { margin: 0; font-size: 30px; font-weight: 500; }
+.back-link { position: absolute; left: -5px; top: 50%; transform: translateY(-50%);
+             width: 56px; height: 56px; padding: 8px; border-radius: 15px; background: #fff;
+             box-shadow: 0 4px 5px rgba(0, 0, 0, .25); }
+.back-link img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+/* Category / type tiles: white rounded squares, line icon on top, label under */
+.tile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.tile-grid.stack { grid-template-columns: 1fr; gap: 18px; }
+.tile { display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 16px 8px 12px; border-radius: 20px; background: #fff; color: #000;
+        text-decoration: none; font-size: 21px; font-weight: 600;
+        box-shadow: 0 3px 8px rgba(159, 31, 71, .14); transition: transform .12s ease; }
+.tile:active { transform: scale(.97); }
+.tile svg { width: 78px; height: 78px; margin-bottom: 6px; }
+.tile.big { padding: 22px 8px 16px; }
+.tile.big svg { width: 128px; height: 128px; margin-bottom: 10px; }
+
+/* Skin Care tile before that page exists: same look, not clickable */
+.tile.disabled { opacity: .55; cursor: default; }
+.tile .soon { margin-top: 2px; font-size: 14px; font-weight: 500; color: #555; }
+
+/* ---------- Product list: laid out like the Ulta listing ---------- */
+
+/* Top row: Show filters (opens the filter screen) */
+.filter-top { display: flex; gap: 8px; margin-bottom: 10px; }
+.outline-btn { display: inline-flex; align-items: center; padding: 7px 14px; border: 1px solid #000; border-radius: 100px;
+               background: #fff; color: #000; font: 500 14px Karla, sans-serif; text-decoration: none; cursor: pointer; }
+
+/* Scrolling row of filter chips */
+.chip-row { display: flex; gap: 8px; overflow-x: auto; padding: 2px 20px 8px; margin: 0 -20px; scrollbar-width: none; }
+.chip-row::-webkit-scrollbar { display: none; }
+.chip { flex: 0 0 auto; padding: 7px 16px; border: 1px solid #000; border-radius: 100px; background: #fff;
+        font: 500 14px Karla, sans-serif; color: #000; cursor: pointer; }
+.chip.on { background: var(--pink); border-color: var(--border); }
+.chip.on::after { content: " \00d7"; font-weight: 700; }
+.active-row { margin-bottom: 4px; }
+.clear-all { padding: 4px 0; border: 0; background: none; color: #000; font: 500 14px Karla, sans-serif;
+             text-decoration: underline; cursor: pointer; }
+
+/* "N results" and Sort by */
+.result-bar { display: flex; align-items: center; justify-content: space-between; margin: 10px 0 14px; }
+.result-count { font-size: 20px; font-weight: 700; }
+.sort-label { font-size: 13px; color: #555; }
+.sort-select { background: transparent; border: 0; border-bottom: 1px solid #000; border-radius: 0; margin: 0 0 0 4px;
+               font: 600 13px Karla, sans-serif; color: #000; }
+
+/* Two-column grid of products */
+.product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 12px; }
+.pcard { display: flex; flex-direction: column; min-width: 0; }
+
+/* Warm gray photo tile with the store name in the corner (like "44 colors" on Ulta) */
+.pcard-photo { position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 1 / 1;
+               border-radius: 14px; background: #f7f5f2; overflow: hidden; text-decoration: none; }
+.pcard-photo img { width: 100%; height: 100%; object-fit: contain; padding: 8px 8px 26px; mix-blend-mode: multiply; }
+.pcard-store { position: absolute; left: 10px; bottom: 8px; font-size: 12px; font-weight: 500; color: #666; }
+.photo-fallback { display: none; width: 70px; height: 70px; opacity: .85; }
+.photo-fallback svg { width: 100%; height: 100%; }
+.pcard-photo.no-photo img { display: none; }
+.pcard-photo.no-photo .photo-fallback { display: block; }
+
+.pcard-body { flex: 1; padding-top: 10px; color: inherit; text-decoration: none; }
+.pcard-brand { display: block; font-size: 13px; font-weight: 700; }
+.pcard-name { margin: 1px 0 4px; font-size: 14px; line-height: 1.25; font-weight: 400; text-align: left; }
+
+/* Black stars, partly filled for ratings like 4.6 */
+.rating-row { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #444; }
+.stars { font-size: 14px; letter-spacing: 1px; line-height: 1;
+         background: linear-gradient(90deg, #000 var(--fill, 0%), #cfcfcf var(--fill, 0%));
+         -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+.pcard-price { margin-top: 4px; font-size: 17px; font-weight: 600; }
+
+/* Pink pill button, same as "Add to List" on the product pages */
+.add-btn { align-self: flex-start; margin-top: 8px; padding: 8px 18px; border: 1px solid var(--border); border-radius: 100px;
+           background: var(--pink); color: #000; box-shadow: 0 3px 4px rgba(0, 0, 0, .22);
+           font: 500 15px Karla, sans-serif; cursor: pointer; }
+.add-btn:active { transform: translateY(1px); }
+.add-btn.on { background: var(--border); color: #fff; }
+.shop-text { margin-top: 8px; color: #000; font-size: 13px; text-decoration: underline; }
+
+.empty { grid-column: 1 / -1; margin-top: 30px; text-align: center; color: #555; font-size: 17px; }
+.credit { margin: 22px 4px 0; font-size: 11px; line-height: 1.35; color: #777; text-align: center; }

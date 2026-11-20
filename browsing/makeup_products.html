@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MatchUp - Makeup Products</title>
+  <!-- Shared phone frame + navbar styles from the team, then this section's styles -->
+  <link rel="stylesheet" href="../navigation-bar/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="browse.css">
+</head>
+<body>
+  <main class="phone browse">
+    <div class="browse-scroll">
+      <div class="top-bar">
+        <a class="back-link" href="makeup_types.html" aria-label="Back to makeup types"><img src="../assets/back_arrow.png" alt=""></a>
+        <h1 id="pageTitle">Makeup</h1>
+      </div>
+
+      <!-- Show filters opens the filter screen (products/product_filters.html) -->
+      <div class="filter-top">
+        <a class="outline-btn" href="../products/product_filters.html">Show filters</a>
+      </div>
+
+      <!-- Quick filter chips: tap to turn on/off -->
+      <div class="chip-row" id="chipRow"></div>
+      <div class="active-row" id="activeRow"></div>
+
+      <div class="result-bar">
+        <span class="result-count" id="resultCount">0 results</span>
+        <label class="sort-label">Sort by
+          <select class="sort-select" id="sortSelect">
+            <option value="featured">Best Sellers</option>
+            <option value="priceLow">Price: Low to High</option>
+            <option value="priceHigh">Price: High to Low</option>
+            <option value="rating">Top Rated</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="product-grid" id="productGrid"></div>
+
+      <!-- Credit for photos, prices and product info shown from the retailers -->
+      <p class="credit">Product photos, prices and details come from Ulta Beauty and Sephora and belong to them and the brands. Tap "Shop" to see each product on the retailer's site. Prices may change.</p>
+    </div>
+
+    <!-- Shared navbar is loaded here by ../navigation-bar/script.js -->
+    <div id="navbar-container"></div>
+  </main>
+
+  <script src="makeup_data.js"></script>
+  <script>
+    // Which makeup type to show comes from the link, e.g. makeup_products.html?type=foundation
+    const type = new URLSearchParams(window.location.search).get("type");
+    const typeInfo = TYPES.find(t => t.key === type);
+    if (typeInfo) document.getElementById("pageTitle").textContent = typeInfo.label;
+
+    const items = PRODUCTS.filter(p => p.type === type);
+
+    // ---- Saved products (the "Add to list" button) are remembered in the browser ----
+    function getSaved() { try { return JSON.parse(localStorage.getItem("matchupFavorites")) || []; } catch (e) { return []; } }
+    function setSaved(list) { try { localStorage.setItem("matchupFavorites", JSON.stringify(list)); } catch (e) {} }
+
+    // ---- Filter chips: retailer chips work as OR, the others narrow the list further (AND) ----
+    const CHIPS = [
+      { key: "sephora", label: "Sephora",      group: "store", test: p => p.retailer === "Sephora" },
+      { key: "ulta",    label: "Ulta",         group: "store", test: p => p.retailer === "Ulta" },
+      { key: "under25", label: "Under $25",    test: p => p.price != null && p.price < 25 },
+      { key: "vegan",   label: "Vegan",        test: p => (p.tags || []).includes("Vegan") },
+      { key: "cruelty", label: "Cruelty-Free", test: p => (p.tags || []).includes("Cruelty-Free") }
+    ];
+    const active = new Set();
+
+    function renderChips() {
+      const row = document.getElementById("chipRow");
+      row.innerHTML = CHIPS.map(c =>
+        '<button class="chip' + (active.has(c.key) ? ' on' : '') + '" data-key="' + c.key + '">' + c.label + '</button>'
+      ).join("");
+      // Clear All sits on its own line under the chips, like Ulta
+      document.getElementById("activeRow").innerHTML = active.size ? '<button class="clear-all" id="clearAll">Clear All</button>' : '';
+      row.querySelectorAll(".chip").forEach(btn => btn.addEventListener("click", () => {
+        active.has(btn.dataset.key) ? active.delete(btn.dataset.key) : active.add(btn.dataset.key);
+        renderChips(); renderList();
+      }));
+      const clear = document.getElementById("clearAll");
+      if (clear) clear.addEventListener("click", () => { active.clear(); renderChips(); renderList(); });
+    }
+
+    // Stars: whole row of black stars filled to the rating (4.6 -> 92%)
+    function starsHTML(r) {
+      return '<span class="stars" style="--fill:' + (r / 5 * 100) + '%" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>';
+    }
+
+    function renderList() {
+      // 1) apply chips
+      const stores = CHIPS.filter(c => c.group === "store" && active.has(c.key));
+      const others = CHIPS.filter(c => !c.group && active.has(c.key));
+      let list = items.filter(p =>
+        (stores.length === 0 || stores.some(c => c.test(p))) && others.every(c => c.test(p)));
+
+      // 2) sort (products without a price/rating go to the end)
+      const sort = document.getElementById("sortSelect").value;
+      const num = (v, fallback) => v == null ? fallback : v;
+      if (sort === "priceLow")  list = list.slice().sort((a, b) => num(a.price, 1e9) - num(b.price, 1e9));
+      if (sort === "priceHigh") list = list.slice().sort((a, b) => num(b.price, -1) - num(a.price, -1));
+      if (sort === "rating")    list = list.slice().sort((a, b) => num(b.rating, -1) - num(a.rating, -1));
+
+      document.getElementById("resultCount").textContent = list.length + (list.length === 1 ? " result" : " results");
+      const grid = document.getElementById("productGrid");
+      if (list.length === 0) { grid.innerHTML = '<p class="empty">No products match these filters.</p>'; return; }
+
+      const saved = getSaved();
+      grid.innerHTML = list.map(p => {
+        // Products with a detail page open it (its back button returns here);
+        // the others open the retailer's site in a new tab.
+        const href = p.page || shopUrl(p);
+        const ext = p.page ? "" : ' target="_blank" rel="noopener"';
+        const photo = p.img ? '<img src="' + p.img + '" alt="' + p.brand + " " + p.name + '" referrerpolicy="no-referrer" loading="lazy">' : "";
+        const rating = p.rating ? '<div class="rating-row">' + starsHTML(p.rating) + '<span>' + p.rating.toFixed(1) + ' (' + p.reviews + ')</span></div>' : "";
+        const price = p.price == null ? "" : '<div class="pcard-price">$' + p.price.toFixed(2) + '</div>';
+        const isSaved = saved.includes(p.id);
+        return '<article class="pcard">' +
+          '<a class="pcard-photo' + (p.img ? "" : " no-photo") + '" href="' + href + '"' + ext + '>' + photo +
+            '<span class="photo-fallback">' + icon(p.type) + '</span>' +
+            '<span class="pcard-store">At ' + p.retailer + '</span></a>' +
+          '<a class="pcard-body" href="' + href + '"' + ext + '>' +
+            '<span class="pcard-brand">' + p.brand + '</span>' +
+            '<h2 class="pcard-name">' + p.name + '</h2>' + rating + price +
+          '</a>' +
+          '<button class="add-btn' + (isSaved ? " on" : "") + '" data-id="' + p.id + '">' + (isSaved ? "Added ✓" : "Add to list") + '</button>' +
+          '<a class="shop-text" href="' + shopUrl(p) + '" target="_blank" rel="noopener">Shop at ' + p.retailer + ' &#8599;</a>' +
+        '</article>';
+      }).join("");
+
+      // Photo can't load (offline, blocked, or no photo yet): hide it and show the category icon
+      grid.querySelectorAll(".pcard-photo img").forEach(img =>
+        img.addEventListener("error", () => img.closest(".pcard-photo").classList.add("no-photo")));
+
+      // Add to list toggles the product in the saved list
+      grid.querySelectorAll(".add-btn").forEach(btn => btn.addEventListener("click", () => {
+        let s = getSaved();
+        s = s.includes(btn.dataset.id) ? s.filter(id => id !== btn.dataset.id) : s.concat(btn.dataset.id);
+        setSaved(s);
+        const on = s.includes(btn.dataset.id);
+        btn.classList.toggle("on", on);
+        btn.textContent = on ? "Added ✓" : "Add to list";
+      }));
+    }
+
+    document.getElementById("sortSelect").addEventListener("change", renderList);
+    renderChips();
+    renderList();
+    highlightBrowseIcon();
+  </script>
+  <script src="../navigation-bar/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MatchUp - Categories</title>
+  <!-- Shared phone frame + navbar styles from the team, then this section's styles -->
+  <link rel="stylesheet" href="../navigation-bar/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="browse.css">
+</head>
+<body>
+  <main class="phone browse">
+    <div class="browse-scroll">
+      <div class="top-bar"><h1>Categories</h1></div>
+
+      <!-- Same order as the wireframe: Skin Care on top, Makeup below -->
+      <div class="tile-grid stack" id="categoryTiles"></div>
+    </div>
+
+    <!-- Shared navbar is loaded here by ../navigation-bar/script.js -->
+    <div id="navbar-container"></div>
+  </main>
+
+  <script src="makeup_data.js"></script>
+  <script>
+    // Skin Care is another teammate's section and its pages are not in the repo yet,
+    // so that tile is shown but not clickable. Makeup goes to the makeup types.
+    document.getElementById("categoryTiles").innerHTML =
+      '<div class="tile big disabled" aria-disabled="true">' + icon("skincare") + 'Skin Care<span class="soon">Coming soon</span></div>' +
+      '<a class="tile big" href="makeup_types.html">' + icon("makeup") + 'Makeup</a>';
+    highlightBrowseIcon();
+  </script>
+  <script src="../navigation-bar/script.js"></script>
+</body>
+</html>
