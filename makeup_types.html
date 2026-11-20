@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="browse.css">
+  <title>MatchUp - Makeup</title>
+</head>
+<body>
+  <main class="phone browse">
+    <div class="browse-scroll">
+      <div class="top-bar">
+        <h1>Makeup</h1>
+      </div>
+
+      <div class="tile-grid" id="typeTiles"></div>
+    </div>
+    <nav class="navbar" aria-label="Main navigation">
+      <ul>
+        <li><a href="#" aria-label="Home"><img src="assets/navbar-icons/home-icon-black.png" data-black="assets/navbar-icons/home-icon-black.png" data-pink="assets/navbar-icons/home-icon-pink.png" alt=""></a></li>
+        <li><a href="#" aria-label="Favorites"><img src="assets/navbar-icons/favorites-icon-black.png" data-black="assets/navbar-icons/favorites-icon-black.png" data-pink="assets/navbar-icons/favorites-icon-pink.png" alt=""></a></li>
+        <li><a href="intro_scan.html" aria-label="Scan"><img src="assets/navbar-icons/scan-icon-black.png" data-black="assets/navbar-icons/scan-icon-black.png" data-pink="assets/navbar-icons/scan-icon-pink.png" alt=""></a></li>
+        <li class="active"><a href="browse_items.html" aria-label="Browse"><img src="assets/navbar-icons/browse-icon-pink.png" data-black="assets/navbar-icons/browse-icon-black.png" data-pink="assets/navbar-icons/browse-icon-pink.png" alt=""></a></li>
+        <li><a href="#" aria-label="Account"><img src="assets/navbar-icons/account-icon-black.png" data-black="assets/navbar-icons/account-icon-black.png" data-pink="assets/navbar-icons/account-icon-pink.png" alt=""></a></li>
+      </ul>
+    </nav>
+  </main>
+
+  <script src="makeup_data.js"></script>
+  <script src="script.js"></script>
+  <script>
+  
+    document.getElementById("typeTiles").innerHTML = TYPES.map(t =>
+      '<a class="tile" href="makeup_products.html?type=' + t.key + '">' + icon(t.key) + t.label + '</a>'
+    ).join("");
+  </script>
+</body>
+</html>
